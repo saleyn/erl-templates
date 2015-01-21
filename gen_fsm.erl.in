@@ -1,0 +1,143 @@
+%%%----------------------------------------------------------------------------
+%%% @doc %BRIEF%
+%%% @author %AUTHOR% <%EMAIL%>
+%%% @copyright %COPYRIGHT%
+%%% @end
+%%%----------------------------------------------------------------------------
+%%% Created: %DATE%
+%%%----------------------------------------------------------------------------
+-module(%MODULE%).
+-author('%EMAIL%').
+
+-behaviour(gen_fsm).
+
+%% API
+-export([start_link/0, start/0]).
+
+%% gen_fsm callbacks
+-export([init/1, handle_event/3,
+         handle_sync_event/4, handle_info/3, terminate/3, code_change/4]).
+
+%% FSM States
+-export([
+    'YOUR_INITIAL_STATE_FUNCTION'/2
+]).
+
+-record(state, {
+}).
+
+%%%----------------------------------------------------------------------------
+%%% External API
+%%%----------------------------------------------------------------------------
+
+%%-----------------------------------------------------------------------------
+%% @spec () -> {ok,Pid} | ignore | {error,Error}
+%% @doc To be called by the supervisor in order to start the server.
+%%      If init/1 fails with Reason, the function returns `{error,Reason}'.
+%%      If init/1 returns `{stop,Reason}' or ignore, the process is
+%%      terminated and the function returns `{error,Reason}' or ignore,
+%%      respectively.
+%% @end
+%%-----------------------------------------------------------------------------
+start_link() ->
+    gen_fsm:start_link({local, ?MODULE}, ?MODULE, [], []).
+
+%%-----------------------------------------------------------------------------
+%% @spec () -> {ok,Pid} | ignore | {error,Error}
+%% @doc To be called outside of supervision tree. Use this function for 
+%%      testing purposes.
+%% @end
+%%-----------------------------------------------------------------------------
+start() ->
+    gen_fsm:start_link(?MODULE, [], []).
+
+%%%----------------------------------------------------------------------------
+%%% Callback functions from gen_fsm
+%%%----------------------------------------------------------------------------
+
+%%-----------------------------------------------------------------------------
+%% @private
+%% @spec (Args) ->
+%%          {ok, StateName, StateData}          |
+%%          {ok, StateName, StateData, Timeout} |
+%%          ignore                              |
+%%          {stop, StopReason}
+%% @end
+%%-----------------------------------------------------------------------------
+init([]) ->
+    {ok, 'YOUR_INITIAL_STATE_FUNCTION', #state{}}.
+
+%%-----------------------------------------------------------------------------
+%% @private
+%% @spec (Event, StateData) ->
+%%          {next_state, NextStateName, NextStateData}          |
+%%          {next_state, NextStateName, NextStateData, Timeout} |
+%%          {stop, Reason, NewStateData}
+%% @end
+%%-----------------------------------------------------------------------------
+'YOUR_INITIAL_STATE_FUNCTION'(Event, State) when is_port(Socket) ->
+    % Now we own the socket
+    {next_state, 'YOUR_INITIAL_STATE_FUNCTION', State}.
+
+%%-----------------------------------------------------------------------------
+%% @private
+%% @spec (Event, StateName, StateData) ->
+%%          {next_state, NextStateName, NextStateData}          |
+%%          {next_state, NextStateName, NextStateData, Timeout} |
+%%          {stop, Reason, NewStateData}
+%% @end
+%%-----------------------------------------------------------------------------
+handle_event(Event, StateName, StateData) ->
+    {stop, {StateName, undefined_event, Event}, StateData}.
+
+%%-----------------------------------------------------------------------------
+%% @private
+%% @spec (Event, From, StateName, StateData) ->
+%%          {next_state, NextStateName, NextStateData}            |
+%%          {next_state, NextStateName, NextStateData, Timeout}   |
+%%          {reply, Reply, NextStateName, NextStateData}          |
+%%          {reply, Reply, NextStateName, NextStateData, Timeout} |
+%%          {stop, Reason, NewStateData}                          |
+%%          {stop, Reason, Reply, NewStateData}
+%% @end
+%%-----------------------------------------------------------------------------
+handle_sync_event(Event, _From, StateName, StateData) ->
+    {stop, {StateName, undefined_event, Event}, StateData}.
+
+%%-----------------------------------------------------------------------------
+%% @private
+%% @spec (Event, StateName, StateData) ->
+%%          {next_state, NextStateName, NextStateData}          |
+%%          {next_state, NextStateName, NextStateData, Timeout} |
+%%          {stop, Reason, NewStateData}
+%% @end
+%%-----------------------------------------------------------------------------
+handle_info(_Info, StateName, StateData) ->
+    {noreply, StateName, StateData}.
+
+%%-----------------------------------------------------------------------------
+%% @private
+%% @spec (Reason, StateName, StateData) -> void()
+%% @doc This function is called by a gen_fsm when it is about to
+%%      terminate. It should be the opposite of Module:init/1 and do any
+%%      necessary cleaning up. When it returns, the gen_server terminates
+%%      with Reason. The return value is ignored.
+%% @end
+%%-----------------------------------------------------------------------------
+terminate(_Reason, _StateName, #state{}) ->
+    ok.
+
+%%-----------------------------------------------------------------------------
+%% @private
+%% @spec (OldVsn, StateName, StateData, Extra) -> 
+%%          {ok, NewState, NewStateData}
+%% @doc Convert process state when code is changed.
+%% @end
+%%-----------------------------------------------------------------------------
+code_change(_OldVsn, StateName, StateData, _Extra) ->
+    {ok, StateName, StateData}.
+
+%%%----------------------------------------------------------------------------
+%%% Internal functions
+%%%----------------------------------------------------------------------------
+

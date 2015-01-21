@@ -1,0 +1,97 @@
+%%%----------------------------------------------------------------------------
+%%% @doc %BRIEF%
+%%% @author %AUTHOR% <%EMAIL%>
+%%% @copyright %COPYRIGHT%
+%%% @end
+%%%----------------------------------------------------------------------------
+%%% Created: %DATE%
+%%%----------------------------------------------------------------------------
+-module(%MODULE%).
+-author('%EMAIL%').
+
+-behaviour(application).
+-behaviour(supervisor).
+
+%% API
+-export([]).
+
+%% Application callbacks
+-export([start/2, stop/1, config_change/3]).
+
+%% Supervisor callbacks
+-export([init/1]).
+
+%%%----------------------------------------------------------------------------
+%%% External API
+%%%----------------------------------------------------------------------------
+
+%%%----------------------------------------------------------------------------
+%%% Application callbacks
+%%%----------------------------------------------------------------------------
+
+%%-----------------------------------------------------------------------------
+%% @private
+%% @spec (StartType, StartArgs) -> 
+%%              {ok, Pid} | {ok, Pid, State} | {error, Reason}
+%%          StartType = normal | {takeover,Node} | {failover,Node}
+%% @doc Called by application behavior to start application by creating 
+%%      top-level supervisor. `StartArgs' are taken from `{mod, StartArgs}' 
+%%      option in the `*.app' file.
+%% @see application
+%% @end
+%%-----------------------------------------------------------------------------
+start(_StartType, _StartArgs) ->
+    supervisor:start_link({local, ?MODULE}, ?MODULE, []).
+
+%%-----------------------------------------------------------------------------
+%% @private
+%% @spec (State) -> void()
+%% @doc Called by application behavior to stop application.
+%% @see application
+%% @end
+%%-----------------------------------------------------------------------------
+stop(_State) ->
+    ok.
+
+%%-----------------------------------------------------------------------------
+%% @private
+%% @spec (Changed, New, Removed) -> ok
+%%          Changed = [{atom(),Value}]
+%%          New     = [{atom(),Value}]
+%%          Removed = [atom()]
+%% @doc Called by application behavior on change in application's environment.
+%% @see application
+%% @end
+%%-----------------------------------------------------------------------------
+config_change(_Changed, _New, _Removed) ->
+    ok.
+
+%%%----------------------------------------------------------------------------
+%%% Supervisor callbacks
+%%%----------------------------------------------------------------------------
+
+%%-----------------------------------------------------------------------------
+%% @private
+%% @spec (Args) -> {ok,{{RestartStrategy,MaxR,MaxT},[ChildSpec]}} | ignore
+%% @see supervisor:init/1
+%% @end
+%%-----------------------------------------------------------------------------
+init([]) ->
+    RestartStrategy = {one_for_one, 4, 3600},
+    !!! Modify the ID, M, F, A below !!!
+    SupSpec = {
+          ID                            % ID
+        , {M, F, A}                     % Start function {M,F,A}
+        , permanent                     % Restart = 
+                                        %   permanent | transient | temporary
+        , 5000                          % Shutdown = 
+                                        %   brutal_kill | int()>=0 | infinity
+        , worker                        % Type = worker | supervisor
+        , [%MODULE%]                    % Modules = [Module] | dynamic
+    },
+    {ok, {RestartStrategy, [SupSpec]}}.
+
+%%%----------------------------------------------------------------------------
+%%% Internal functions
+%%%----------------------------------------------------------------------------
+

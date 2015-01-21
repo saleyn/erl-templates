@@ -1,0 +1,11 @@
+{application, %APPLICATION%,
+   [{description, "%DESCRIPTION%"},
+    {vsn, "%VSN%"},
+    {modules, [%MODULES%]},
+    {registered, []},
+    {applications, [kernel, stdlib]},
+    {env, []},
+    {mod, {%START_MODULE%, []}}
+   ]
+}.
+
