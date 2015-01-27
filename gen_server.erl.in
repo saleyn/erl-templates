@@ -1,3 +1,4 @@
+%%% vim:ts=%TABWIDTH%:sw=%TABWIDTH%:et
 %%%----------------------------------------------------------------------------
 %%% @doc %BRIEF%
 %%% @author %AUTHOR% <%EMAIL%>
@@ -33,7 +34,7 @@
 %%      respectively.
 %% @end
 %%-----------------------------------------------------------------------------
--spec start_link() -> {ok, Pid} | ignore | {error, Reason}.
+-spec start_link() -> {ok, Pid} | ignore | {error, any()}.
 start_link() ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
@@ -41,7 +42,7 @@ start_link() ->
 %% @doc Start the server outside of supervision tree.
 %% @end
 %%-----------------------------------------------------------------------------
--spec start() -> {ok, Pid} | {error, Reason}.
+-spec start() -> {ok, Pid} | {error, any()}.
 start() ->
     gen_server:start_link(?MODULE, [], []).
 
@@ -57,7 +58,8 @@ start() ->
 %% @end
 %%-----------------------------------------------------------------------------
 -spec init(Options::list()) ->
-    {ok, #state{}} | {ok, #state{}, Timeout} | ignore | {stop, Reason}.
+    {ok, #state{}} |
+    {ok, #state{}, Timeout :: integer() | hibernate} | ignore | {stop, any()}.
 init([]) ->
     %process_flag(trap_exit, true),
     try
@@ -128,3 +130,5 @@ code_change(_OldVsn, State, _Extra) ->
 %%% Internal functions
 %%%----------------------------------------------------------------------------
 
+%%%.
+%%% vim: set filetype=erlang tabstop=4 foldmarker=%%%',%%%. foldmethod=marker:

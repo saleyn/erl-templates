@@ -34,8 +34,9 @@ now=$(date +%Y-%m-%d)
 author=$(awk -F: 'user == $1 {print $5}' user=$USER /etc/passwd)
 copyright="$author"
 def_email=$(git config --get user.email 2> /dev/null)
+tabwidth=4
 
-while getopts 'hm:e:d:t:c:o:' OPTION ; do
+while getopts 'hm:e:d:t:c:o:w:' OPTION ; do
     case $OPTION in
     c)  [ -n "$OPTARG" ] && copyright="$OPTARG"
         copyrt=1;;
@@ -52,10 +53,13 @@ while getopts 'hm:e:d:t:c:o:' OPTION ; do
         [ -d "$OPTARG" ] || (echo "$OPTARG directory doesn't exist!"  && exit 1)
         outdir="$OPTARG"
         ;;
+    w)  tabwidth=$OPTARG
+        [ $tabwidth -eq 2 -o $tabwidth -eq 4 ] || (echo "Tabwidth must be 2 or 4!" && exit 1);;
+
     *)  echo "This script creates generic Erlang modules from templates."
         echo
         echo "Usage: $0 [-t Type] [-m Module] [-d Description]" 
-        echo "          [-e Email] [-c Copyright] [-o OutputDir] [-h]" 
+        echo "          [-e Email] [-c Copyright] [-o OutputDir] [-h] [-w TabWidth]" 
         echo "  Type        - s = gen_server"
         echo "                l = gen_leader"
         echo "                f = gen_fsm"
@@ -119,6 +123,9 @@ sed -e "s!%AUTHOR%!${author}!g" \
     -e "s!%DATE%!${now}!g" \
     -e "s!%EMAIL%!${email}!g" \
     -e "s!%MODULE%!${module}!g" \
+    -e "s!%TABWIDTH%!${tabwidth}!g" \
+    -e "s!^$(printf '%*s' 4 ' ')\([^ ]\)!$(printf '%*s' $tabwidth ' ')\\1!" \
+    -e "s!^$(printf '%*s' 8 ' ')\([^ ]\)!$(printf '%*s' $((2*$tabwidth)) ' ')\\1!" \
     ${dir}/${template}.erl.in
 
 exec 3>&-       # close temporary file descriptor 3
