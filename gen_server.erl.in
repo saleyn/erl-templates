@@ -126,6 +126,17 @@ terminate(_Reason, #state{}) ->
 code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 
+%%-----------------------------------------------------------------------------
+%% @private
+%% @end
+%%-----------------------------------------------------------------------------
+-callback format_status(Opt, StatusData) -> Status::term() when
+      Opt :: 'normal' | 'terminate',
+      StatusData :: [PDict | State::term()],
+      PDict :: [{Key :: term(), Value :: term()}].
+format_status(Opt, [_, State]) ->
+    lists:zip(record_info(fields, state), tl(tuple_to_list(State))).
+
 %%%----------------------------------------------------------------------------
 %%% Internal functions
 %%%----------------------------------------------------------------------------
