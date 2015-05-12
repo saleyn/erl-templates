@@ -73,6 +73,14 @@ done
 
 shift $((OPTIND - 1))
 
+vars_file=$(readlink -f $0)
+vars_file=${vars_file%/*}/vars.${USER}.config
+
+if [ -f "$vars_file"  ]; then
+    [ -z "$email"     ] && email=$(sed -n '/^EMAIL/s/EMAIL=\(.*\)/\1/p' "$vars_file")
+    [ -z "$copyright" ] && copyright=$(sed -n '/^COPYRIGHT/s/COPYRIGHT=\(.*\)/\1/p' "$vars_file")
+fi
+
 while [ -z "$template" ]; do
     echo "Template type [gen_(s)erver, gen_(l)eader, gen_(f)sm"
     ask  "               (a)pplication, (m)odule]"
@@ -93,7 +101,7 @@ while [ -z "$email" ]; do
     read email && [ -n "$email" ] && break || email="$def_email"
 done
 
-if [ -z "$copyrt" ]; then
+if [ -z "$copyright" ]; then
     ask "Copyright [default: $author]"
     read copyright && [ -n "$copyright" ] || copyright="$author"
 fi

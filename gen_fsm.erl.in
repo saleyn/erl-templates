@@ -32,7 +32,6 @@
 %%%----------------------------------------------------------------------------
 
 %%-----------------------------------------------------------------------------
-%% @spec () -> {ok,Pid} | ignore | {error,Error}
 %% @doc To be called by the supervisor in order to start the server.
 %%      If init/1 fails with Reason, the function returns `{error,Reason}'.
 %%      If init/1 returns `{stop,Reason}' or ignore, the process is
@@ -40,15 +39,16 @@
 %%      respectively.
 %% @end
 %%-----------------------------------------------------------------------------
+-spec start_link() -> {ok,Pid::pid()} | ignore | {error,Error::term()}
 start_link() ->
     gen_fsm:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 %%-----------------------------------------------------------------------------
-%% @spec () -> {ok,Pid} | ignore | {error,Error}
 %% @doc To be called outside of supervision tree. Use this function for 
 %%      testing purposes.
 %% @end
 %%-----------------------------------------------------------------------------
+-spec start() -> {ok,Pid::pid()} | ignore | {error,Error::term()}
 start() ->
     gen_fsm:start_link(?MODULE, [], []).
 
@@ -58,19 +58,18 @@ start() ->
 
 %%-----------------------------------------------------------------------------
 %% @private
-%% @spec (Args) ->
-%%          {ok, StateName, StateData}          |
-%%          {ok, StateName, StateData, Timeout} |
-%%          ignore                              |
-%%          {stop, StopReason}
 %% @end
 %%-----------------------------------------------------------------------------
+-spec init(Args::term()) ->
+    {ok, StateName::atom(), StateData::term()} |
+    {ok, StateName::atom(), StateData::term(), timeout() | hibernate} |
+    {stop, Reason::term()} | ignore.
 init([]) ->
     {ok, 'YOUR_INITIAL_STATE_FUNCTION', #state{}}.
 
 %%-----------------------------------------------------------------------------
 %% @private
-%% @spec (Event, StateData) ->
+%% @spec (Event, StateName, StateData) ->
 %%          {next_state, NextStateName, NextStateData}          |
 %%          {next_state, NextStateName, NextStateData, Timeout} |
 %%          {stop, Reason, NewStateData}
@@ -82,49 +81,53 @@ init([]) ->
 
 %%-----------------------------------------------------------------------------
 %% @private
-%% @spec (Event, StateName, StateData) ->
-%%          {next_state, NextStateName, NextStateData}          |
-%%          {next_state, NextStateName, NextStateData, Timeout} |
-%%          {stop, Reason, NewStateData}
 %% @end
 %%-----------------------------------------------------------------------------
+-spec handle_event(Event::term(), StateName::atom(),
+                       StateData::term()) ->
+    {next_state, NextStateName::atom(), NewStateData::term()} |
+    {next_state, NextStateName::atom(), NewStateData::term(), timeout() | hibernate} |
+    {stop, Reason::term(), NewStateData::term()}.
 handle_event(Event, StateName, StateData) ->
     {stop, {StateName, undefined_event, Event}, StateData}.
 
 %%-----------------------------------------------------------------------------
 %% @private
-%% @spec (Event, From, StateName, StateData) ->
-%%          {next_state, NextStateName, NextStateData}            |
-%%          {next_state, NextStateName, NextStateData, Timeout}   |
-%%          {reply, Reply, NextStateName, NextStateData}          |
-%%          {reply, Reply, NextStateName, NextStateData, Timeout} |
-%%          {stop, Reason, NewStateData}                          |
-%%          {stop, Reason, Reply, NewStateData}
 %% @end
 %%-----------------------------------------------------------------------------
+-spec handle_sync_event(Event::term(), From::{pid(), Tag::term()},
+                            StateName::atom(), State::term()) ->
+    {reply, Reply::term(), NextStateName::atom(), NewState::term()} |
+    {reply, Reply::term(), NextStateName::atom(), NewState::term(), timeout() | hibernate} |
+    {next_state, NextStateName::atom(), NewState::term()} |
+    {next_state, NextStateName::atom(), NewState::term(), timeout() | hibernate} |
+    {stop, Reason::term(), Reply::term(), NewState::term()} |
+    {stop, Reason::term(), NewState::term()}.
 handle_sync_event(Event, _From, StateName, StateData) ->
     {stop, {StateName, undefined_event, Event}, StateData}.
 
 %%-----------------------------------------------------------------------------
 %% @private
-%% @spec (Event, StateName, StateData) ->
-%%          {next_state, NextStateName, NextStateData}          |
-%%          {next_state, NextStateName, NextStateData, Timeout} |
-%%          {stop, Reason, NewStateData}
 %% @end
 %%-----------------------------------------------------------------------------
+-spec handle_info(Info :: term(), StateName :: atom(),
+                      StateData :: term()) ->
+    {next_state, NextStateName :: atom(), NewStateData :: term()} |
+    {next_state, NextStateName :: atom(), NewStateData :: term(), timeout() | hibernate} |
+    {stop, Reason :: normal | term(), NewStateData :: term()}.
 handle_info(_Info, StateName, StateData) ->
     {noreply, StateName, StateData}.
 
 %%-----------------------------------------------------------------------------
 %% @private
-%% @spec (Reason, StateName, StateData) -> void()
 %% @doc This function is called by a gen_fsm when it is about to
 %%      terminate. It should be the opposite of Module:init/1 and do any
 %%      necessary cleaning up. When it returns, the gen_server terminates
 %%      with Reason. The return value is ignored.
 %% @end
 %%-----------------------------------------------------------------------------
+-spec terminate(Reason :: normal | shutdown | {shutdown, term()}
+		    | term(), StateName :: atom(), StateData :: term()) -> term().
 terminate(_Reason, _StateName, #state{}) ->
     ok.
 
@@ -135,8 +138,25 @@ terminate(_Reason, _StateName, #state{}) ->
 %% @doc Convert process state when code is changed.
 %% @end
 %%-----------------------------------------------------------------------------
+-spec code_change(OldVsn :: term() | {down, term()}, StateName :: atom(),
+		      StateData :: term(), Extra :: term()) ->
+    {ok, NextStateName :: atom(), NewStateData :: term()}.
 code_change(_OldVsn, StateName, StateData, _Extra) ->
     {ok, StateName, StateData}.
+
+%%-----------------------------------------------------------------------------
+%% @private
+%% @end
+%%-----------------------------------------------------------------------------
+-callback format_status(Opt, StatusData) -> Status when
+      Opt :: 'normal' | 'terminate',
+      StatusData :: [PDict | State],
+      PDict :: [{Key :: term(), Value :: term()}],
+      State :: term(),
+      Status :: term().
+format_status(Opt), StatusData) ->
+    
+-optional_callbacks([format_status/2]).
 
 %%%----------------------------------------------------------------------------
 %%% Internal functions

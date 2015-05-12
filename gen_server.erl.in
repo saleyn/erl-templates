@@ -34,7 +34,7 @@
 %%      respectively.
 %% @end
 %%-----------------------------------------------------------------------------
--spec start_link() -> {ok, Pid} | ignore | {error, any()}.
+-spec start_link() -> {ok, pid()} | ignore | {error, any()}.
 start_link() ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
@@ -42,7 +42,7 @@ start_link() ->
 %% @doc Start the server outside of supervision tree.
 %% @end
 %%-----------------------------------------------------------------------------
--spec start() -> {ok, Pid} | {error, any()}.
+-spec start() -> {ok, pid()} | {error, any()}.
 start() ->
     gen_server:start_link(?MODULE, [], []).
 
